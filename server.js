@@ -1,22 +1,23 @@
-const dotenv = require("dotenv");
+import dotenv from 'dotenv';
 dotenv.config();
-
-const app = require("./app");
-const connectDB = require("./config/db");
+const mongoose = require('mongoose');
+const app = require('./app');
 
 const PORT = Number(process.env.PORT) || 5000;
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/ai_faq_assistant';
 
-async function startServer() {
+const startServer = async () => {
   try {
-    await connectDB();
+    await mongoose.connect(MONGO_URI);
+    console.log('MongoDB connected successfully.');
 
     app.listen(PORT, () => {
-      console.log(`Server running at http://localhost:${PORT}`);
+      console.log(`AI FAQ Assistant API running on http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error("Server startup failed:", error.message);
+    console.error('Failed to start application:', error.message);
     process.exit(1);
   }
-}
+};
 
 startServer();

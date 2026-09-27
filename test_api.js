@@ -7,6 +7,12 @@ const FAQ = require('./src/models/FAQ');
 // Load environment variables
 dotenv.config();
 
+const closeServer = (server) =>
+  new Promise((resolve) => {
+    if (!server || !server.listening) { resolve(); return; }
+    server.close(() => resolve());
+  });
+
 const runTests = async () => {
   console.log('=== Starting API Endpoint Integration Tests ===');
 
@@ -62,7 +68,8 @@ const runTests = async () => {
       if (registerRes.status !== 201 || !registerData.success) {
         throw new Error('Registration failed');
       }
-      testUserId = registerData.data._id;
+      testUserId = registerData.data?._id;
+      if (!testUserId) throw new Error('Registration succeeded but no user ID was returned');
 
       // ---------------------------------------------------------
       // Test 3: Duplicate Registration Prevention
@@ -102,7 +109,8 @@ const runTests = async () => {
       if (loginRes.status !== 200 || !loginData.success) {
         throw new Error('Login failed');
       }
-      authToken = loginData.data.token;
+      authToken = loginData.data?.token;
+      if (!authToken) throw new Error('Login succeeded but no auth token was returned');
 
       // ---------------------------------------------------------
       // Test 5: Get User Profile (Protected)
@@ -143,7 +151,8 @@ const runTests = async () => {
       if (createFaqRes.status !== 201 || !createFaqData.success) {
         throw new Error('FAQ creation failed');
       }
-      testFaqId = createFaqData.data._id;
+      testFaqId = createFaqData.data?._id;
+      if (!testFaqId) throw new Error('FAQ creation succeeded but no FAQ ID was returned');
 
       // ---------------------------------------------------------
       // Test 7: Get All FAQs (Public)
@@ -299,6 +308,7 @@ const runTests = async () => {
 
     } catch (err) {
       console.error('\n!!! API Test Encountered an Error:', err.message);
+      process.exitCode = 1;
     } finally {
       // Cleanup database records to leave it pristine
       console.log('\nCleaning up test records from database...');
@@ -313,11 +323,14 @@ const runTests = async () => {
 
       // Close server and database connection
       console.log('Closing server and Mongoose connection...');
-      server.close();
+      await closeServer(server);
       await mongoose.connection.close();
       console.log('Done. Connections closed cleanly.');
     }
   });
 };
 
-runTests().catch(console.error);
+runTests().catch((err) => {
+  console.error('\n!!! API Test Failed:', err.message);
+  process.exitCode = 1;
+});
