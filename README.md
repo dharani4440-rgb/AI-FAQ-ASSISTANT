@@ -1,106 +1,416 @@
-﻿# whatwg-url
+# router
 
-whatwg-url is a full implementation of the WHATWG [URL Standard](https://url.spec.whatwg.org/). It can be used standalone, but it also exposes a lot of the internal algorithms that are useful for integrating a URL parser into a project like [jsdom](https://github.com/jsdom/jsdom).
+[![NPM Version][npm-image]][npm-url]
+[![NPM Downloads][downloads-image]][downloads-url]
+[![Node.js Version][node-version-image]][node-version-url]
+[![Build Status][ci-image]][ci-url]
+[![Test Coverage][coveralls-image]][coveralls-url]
 
-## Specification conformance
+Simple middleware-style router
 
-whatwg-url is currently up to date with the URL spec up to commit [6c78200](https://github.com/whatwg/url/commit/6c782003a2d53b1feecd072d1006eb8f1d65fb2d).
+## Installation
 
-For `file:` URLs, whose [origin is left unspecified](https://url.spec.whatwg.org/#concept-url-origin), whatwg-url chooses to use a new opaque origin (which serializes to `"null"`).
+This is a [Node.js](https://nodejs.org/en/) module available through the
+[npm registry](https://www.npmjs.com/). Installation is done using the
+[`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
 
-whatwg-url does not yet implement any encoding handling beyond UTF-8. That is, the _encoding override_ parameter does not exist in our API.
+```bash
+$ npm install router
+```
 
 ## API
 
-### The `URL` and `URLSearchParams` classes
+```js
+var finalhandler = require('finalhandler')
+var http = require('http')
+var Router = require('router')
 
-The main API is provided by the [`URL`](https://url.spec.whatwg.org/#url-class) and [`URLSearchParams`](https://url.spec.whatwg.org/#interface-urlsearchparams) exports, which follows the spec's behavior in all ways (including e.g. `USVString` conversion). Most consumers of this library will want to use these.
+var router = Router()
+router.get('/', function (req, res) {
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+  res.end('Hello World!')
+})
 
-### Low-level URL Standard API
+var server = http.createServer(function (req, res) {
+  router(req, res, finalhandler(req, res))
+})
 
-The following methods are exported for use by places like jsdom that need to implement things like [`HTMLHyperlinkElementUtils`](https://html.spec.whatwg.org/#htmlhyperlinkelementutils). They mostly operate on or return an "internal URL" or ["URL record"](https://url.spec.whatwg.org/#concept-url) type.
+server.listen(3000)
+```
 
-- [URL parser](https://url.spec.whatwg.org/#concept-url-parser): `parseURL(input, { baseURL })`
-- [Basic URL parser](https://url.spec.whatwg.org/#concept-basic-url-parser): `basicURLParse(input, { baseURL, url, stateOverride })`
-- [URL serializer](https://url.spec.whatwg.org/#concept-url-serializer): `serializeURL(urlRecord, excludeFragment)`
-- [Host serializer](https://url.spec.whatwg.org/#concept-host-serializer): `serializeHost(hostFromURLRecord)`
-- [URL path serializer](https://url.spec.whatwg.org/#url-path-serializer): `serializePath(urlRecord)`
-- [Serialize an integer](https://url.spec.whatwg.org/#serialize-an-integer): `serializeInteger(number)`
-- [Origin](https://url.spec.whatwg.org/#concept-url-origin) [serializer](https://html.spec.whatwg.org/multipage/origin.html#ascii-serialisation-of-an-origin): `serializeURLOrigin(urlRecord)`
-- [Set the username](https://url.spec.whatwg.org/#set-the-username): `setTheUsername(urlRecord, usernameString)`
-- [Set the password](https://url.spec.whatwg.org/#set-the-password): `setThePassword(urlRecord, passwordString)`
-- [Has an opaque path](https://url.spec.whatwg.org/#url-opaque-path): `hasAnOpaquePath(urlRecord)`
-- [Cannot have a username/password/port](https://url.spec.whatwg.org/#cannot-have-a-username-password-port): `cannotHaveAUsernamePasswordPort(urlRecord)`
-- [Percent decode bytes](https://url.spec.whatwg.org/#percent-decode): `percentDecodeBytes(uint8Array)`
-- [Percent decode a string](https://url.spec.whatwg.org/#string-percent-decode): `percentDecodeString(string)`
+This module is currently an extracted version from the Express project,
+but with the main change being it can be used with a plain `http.createServer`
+object or other web frameworks by removing Express-specific API calls.
 
-The `stateOverride` parameter is one of the following strings:
+## Router(options)
 
-- [`"scheme start"`](https://url.spec.whatwg.org/#scheme-start-state)
-- [`"scheme"`](https://url.spec.whatwg.org/#scheme-state)
-- [`"no scheme"`](https://url.spec.whatwg.org/#no-scheme-state)
-- [`"special relative or authority"`](https://url.spec.whatwg.org/#special-relative-or-authority-state)
-- [`"path or authority"`](https://url.spec.whatwg.org/#path-or-authority-state)
-- [`"relative"`](https://url.spec.whatwg.org/#relative-state)
-- [`"relative slash"`](https://url.spec.whatwg.org/#relative-slash-state)
-- [`"special authority slashes"`](https://url.spec.whatwg.org/#special-authority-slashes-state)
-- [`"special authority ignore slashes"`](https://url.spec.whatwg.org/#special-authority-ignore-slashes-state)
-- [`"authority"`](https://url.spec.whatwg.org/#authority-state)
-- [`"host"`](https://url.spec.whatwg.org/#host-state)
-- [`"hostname"`](https://url.spec.whatwg.org/#hostname-state)
-- [`"port"`](https://url.spec.whatwg.org/#port-state)
-- [`"file"`](https://url.spec.whatwg.org/#file-state)
-- [`"file slash"`](https://url.spec.whatwg.org/#file-slash-state)
-- [`"file host"`](https://url.spec.whatwg.org/#file-host-state)
-- [`"path start"`](https://url.spec.whatwg.org/#path-start-state)
-- [`"path"`](https://url.spec.whatwg.org/#path-state)
-- [`"opaque path"`](https://url.spec.whatwg.org/#cannot-be-a-base-url-path-state)
-- [`"query"`](https://url.spec.whatwg.org/#query-state)
-- [`"fragment"`](https://url.spec.whatwg.org/#fragment-state)
+Options
 
-The URL record type has the following API:
+- `strict`        - When `false` trailing slashes are optional (default: `false`)
+- `caseSensitive` - When `true` the routing will be case sensitive. (default: `false`)
+- `mergeParams`   - When `true` any `req.params` passed to the router will be
+  merged into the router's `req.params`. (default: `false`) ([example](#example-using-mergeparams))
 
-- [`scheme`](https://url.spec.whatwg.org/#concept-url-scheme)
-- [`username`](https://url.spec.whatwg.org/#concept-url-username)
-- [`password`](https://url.spec.whatwg.org/#concept-url-password)
-- [`host`](https://url.spec.whatwg.org/#concept-url-host)
-- [`port`](https://url.spec.whatwg.org/#concept-url-port)
-- [`path`](https://url.spec.whatwg.org/#concept-url-path) (as an array of strings, or a string)
-- [`query`](https://url.spec.whatwg.org/#concept-url-query)
-- [`fragment`](https://url.spec.whatwg.org/#concept-url-fragment)
+Returns a function with the signature `router(req, res, callback)` where
+`callback([err])` must be provided to handle errors and fall-through from
+not handling requests.
 
-These properties should be treated with care, as in general changing them will cause the URL record to be in an inconsistent state until the appropriate invocation of `basicURLParse` is used to fix it up. You can see examples of this in the URL Standard, where there are many step sequences like "4. Set context object’s url’s fragment to the empty string. 5. Basic URL parse _input_ with context object’s url as _url_ and fragment state as _state override_." In between those two steps, a URL record is in an unusable state.
+### router.use([path], ...middleware)
 
-The return value of "failure" in the spec is represented by `null`. That is, functions like `parseURL` and `basicURLParse` can return _either_ a URL record _or_ `null`.
+Use the given [middleware function](#middleware) for all http methods on the
+given `path`, defaulting to the root path.
 
-### `whatwg-url/webidl2js-wrapper` module
+`router` does not automatically see `use` as a handler. As such, it will not
+consider it one for handling `OPTIONS` requests.
 
-This module exports the `URL` and `URLSearchParams` [interface wrappers API](https://github.com/jsdom/webidl2js#for-interfaces) generated by [webidl2js](https://github.com/jsdom/webidl2js).
+* Note: If a `path` is specified, that `path` is stripped from the start of
+  `req.url`.
 
-## Development instructions
+<!-- eslint-disable no-undef -->
 
-First, install [Node.js](https://nodejs.org/). Then, fetch the dependencies of whatwg-url, by running from this directory:
+```js
+router.use(function (req, res, next) {
+  // do your things
 
-    npm install
+  // continue to the next middleware
+  // the request will stall if this is not called
+  next()
 
-To run tests:
+  // note: you should NOT call `next` if you have begun writing to the response
+})
+```
 
-    npm test
+[Middleware](#middleware) can themselves use `next('router')` at any time to
+exit the current router instance completely, invoking the top-level callback.
 
-To generate a coverage report:
+### router\[method](path, ...[middleware], handler)
 
-    npm run coverage
+The [http methods](https://github.com/jshttp/methods/blob/master/index.js) provide
+the routing functionality in `router`.
 
-To build and run the live viewer:
+Method middleware and handlers follow usual [middleware](#middleware) behavior,
+except they will only be called when the method and path match the request.
 
-    npm run prepare
-    npm run build-live-viewer
+<!-- eslint-disable no-undef -->
 
-Serve the contents of the `live-viewer` directory using any web server.
+```js
+// handle a `GET` request
+router.get('/', function (req, res) {
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+  res.end('Hello World!')
+})
+```
 
-## Supporting whatwg-url
+[Middleware](#middleware) given before the handler have one additional trick,
+they may invoke `next('route')`. Calling `next('route')` bypasses the remaining
+middleware and the handler mounted for this route, passing the request to the
+next route suitable for handling this request.
 
-The jsdom project (including whatwg-url) is a community-driven project maintained by a team of [volunteers](https://github.com/orgs/jsdom/people). You could support us by:
+Route handlers and middleware can themselves use `next('router')` at any time
+to exit the current router instance completely, invoking the top-level callback.
 
-- [Getting professional support for whatwg-url](https://tidelift.com/subscription/pkg/npm-whatwg-url?utm_source=npm-whatwg-url&utm_medium=referral&utm_campaign=readme) as part of a Tidelift subscription. Tidelift helps making open source sustainable for us while giving teams assurances for maintenance, licensing, and security.
-- Contributing directly to the project.
+### router.param(name, param_middleware)
+
+Maps the specified path parameter `name` to a specialized param-capturing middleware.
+
+This function positions the middleware in the same stack as `.use`.
+
+The function can optionally return a `Promise` object. If a `Promise` object
+is returned from the function, the router will attach an `onRejected` callback
+using `.then`. If the promise is rejected, `next` will be called with the
+rejected value, or an error if the value is falsy.
+
+Parameter mapping is used to provide pre-conditions to routes
+which use normalized placeholders. For example a _:user_id_ parameter
+could automatically load a user's information from the database without
+any additional code:
+
+<!-- eslint-disable no-undef -->
+
+```js
+router.param('user_id', function (req, res, next, id) {
+  User.find(id, function (err, user) {
+    if (err) {
+      return next(err)
+    } else if (!user) {
+      return next(new Error('failed to load user'))
+    }
+    req.user = user
+
+    // continue processing the request
+    next()
+  })
+})
+```
+
+### router.route(path)
+
+Creates an instance of a single `Route` for the given `path`.
+(See `Router.Route` below)
+
+Routes can be used to handle http `methods` with their own, optional middleware.
+
+Using `router.route(path)` is a recommended approach to avoiding duplicate
+route naming and thus typo errors.
+
+<!-- eslint-disable no-undef, no-unused-vars -->
+
+```js
+var api = router.route('/api/')
+```
+
+## Router.Route(path)
+
+Represents a single route as an instance that can be used to handle http
+`methods` with it's own, optional middleware.
+
+### route\[method](handler)
+
+These are functions which you can directly call on a route to register a new
+`handler` for the `method` on the route.
+
+<!-- eslint-disable no-undef -->
+
+```js
+// handle a `GET` request
+var status = router.route('/status')
+
+status.get(function (req, res) {
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+  res.end('All Systems Green!')
+})
+```
+
+### route.all(handler)
+
+Adds a handler for all HTTP methods to this route.
+
+The handler can behave like middleware and call `next` to continue processing
+rather than responding.
+
+<!-- eslint-disable no-undef -->
+
+```js
+router.route('/')
+  .all(function (req, res, next) {
+    next()
+  })
+  .all(checkSomething)
+  .get(function (req, res) {
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+    res.end('Hello World!')
+  })
+```
+
+## Middleware
+
+Middleware (and method handlers) are functions that follow specific function
+parameters and have defined behavior when used with `router`. The most common
+format is with three parameters - "req", "res" and "next".
+
+- `req`  - This is a [HTTP incoming message](https://nodejs.org/api/http.html#http_http_incomingmessage) instance.
+- `res`  - This is a [HTTP server response](https://nodejs.org/api/http.html#http_class_http_serverresponse) instance.
+- `next` - Calling this function that tells `router` to proceed to the next matching middleware or method handler. It accepts an error as the first argument.
+
+The function can optionally return a `Promise` object. If a `Promise` object
+is returned from the function, the router will attach an `onRejected` callback
+using `.then`. If the promise is rejected, `next` will be called with the
+rejected value, or an error if the value is falsy.
+
+Middleware and method handlers can also be defined with four arguments. When
+the function has four parameters defined, the first argument is an error and
+subsequent arguments remain, becoming - "err", "req", "res", "next". These
+functions are "error handling middleware", and can be used for handling
+errors that occurred in previous handlers (E.g. from calling `next(err)`).
+This is most used when you want to define arbitrary rendering of errors.
+
+<!-- eslint-disable no-undef -->
+
+```js
+router.get('/error_route', function (req, res, next) {
+  return next(new Error('Bad Request'))
+})
+
+router.use(function (err, req, res, next) {
+  res.end(err.message) //= > "Bad Request"
+})
+```
+
+Error handling middleware will **only** be invoked when an error was given. As
+long as the error is in the pipeline, normal middleware and handlers will be
+bypassed - only error handling middleware will be invoked with an error.
+
+## Examples
+
+```js
+// import our modules
+var http = require('http')
+var Router = require('router')
+var finalhandler = require('finalhandler')
+var compression = require('compression')
+var bodyParser = require('body-parser')
+
+// store our message to display
+var message = 'Hello World!'
+
+// initialize the router & server and add a final callback.
+var router = Router()
+var server = http.createServer(function onRequest (req, res) {
+  router(req, res, finalhandler(req, res))
+})
+
+// use some middleware and compress all outgoing responses
+router.use(compression())
+
+// handle `GET` requests to `/message`
+router.get('/message', function (req, res) {
+  res.statusCode = 200
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+  res.end(message + '\n')
+})
+
+// create and mount a new router for our API
+var api = Router()
+router.use('/api/', api)
+
+// add a body parsing middleware to our API
+api.use(bodyParser.json())
+
+// handle `PATCH` requests to `/api/set-message`
+api.patch('/set-message', function (req, res) {
+  if (req.body.value) {
+    message = req.body.value
+
+    res.statusCode = 200
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+    res.end(message + '\n')
+  } else {
+    res.statusCode = 400
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+    res.end('Invalid API Syntax\n')
+  }
+})
+
+// make our http server listen to connections
+server.listen(8080)
+```
+
+You can get the message by running this command in your terminal,
+ or navigating to `127.0.0.1:8080` in a web browser.
+```bash
+curl http://127.0.0.1:8080
+```
+
+You can set the message by sending it a `PATCH` request via this command:
+```bash
+curl http://127.0.0.1:8080/api/set-message -X PATCH -H "Content-Type: application/json" -d '{"value":"Cats!"}'
+```
+
+### Example using mergeParams
+
+```js
+var http = require('http')
+var Router = require('router')
+var finalhandler = require('finalhandler')
+
+// this example is about the mergeParams option
+var opts = { mergeParams: true }
+
+// make a router with out special options
+var router = Router(opts)
+var server = http.createServer(function onRequest (req, res) {
+  // set something to be passed into the router
+  req.params = { type: 'kitten' }
+
+  router(req, res, finalhandler(req, res))
+})
+
+router.get('/', function (req, res) {
+  res.statusCode = 200
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+
+  // with respond with the the params that were passed in
+  res.end(req.params.type + '\n')
+})
+
+// make another router with our options
+var handler = Router(opts)
+
+// mount our new router to a route that accepts a param
+router.use('/:path', handler)
+
+handler.get('/', function (req, res) {
+  res.statusCode = 200
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+
+  // will respond with the param of the router's parent route
+  res.end(req.params.path + '\n')
+})
+
+// make our http server listen to connections
+server.listen(8080)
+```
+
+Now you can get the type, or what path you are requesting:
+```bash
+curl http://127.0.0.1:8080
+> kitten
+curl http://127.0.0.1:8080/such_path
+> such_path
+```
+
+### Example of advanced `.route()` usage
+
+This example shows how to implement routes where there is a custom
+handler to execute when the path matched, but no methods matched.
+Without any special handling, this would be treated as just a
+generic non-match by `router` (which typically results in a 404),
+but with a custom handler, a `405 Method Not Allowed` can be sent.
+
+```js
+var http = require('http')
+var finalhandler = require('finalhandler')
+var Router = require('router')
+
+// create the router and server
+var router = new Router()
+var server = http.createServer(function onRequest (req, res) {
+  router(req, res, finalhandler(req, res))
+})
+
+// register a route and add all methods
+router.route('/pet/:id')
+  .get(function (req, res) {
+    // this is GET /pet/:id
+    res.setHeader('Content-Type', 'application/json')
+    res.end(JSON.stringify({ name: 'tobi' }))
+  })
+  .delete(function (req, res) {
+    // this is DELETE /pet/:id
+    res.end()
+  })
+  .all(function (req, res) {
+    // this is called for all other methods not
+    // defined above for /pet/:id
+    res.statusCode = 405
+    res.end()
+  })
+
+// make our http server listen to connections
+server.listen(8080)
+```
+
+## License
+
+[MIT](LICENSE)
+
+[ci-image]: https://badgen.net/github/checks/pillarjs/router/master?label=ci
+[ci-url]: https://github.com/pillarjs/router/actions/workflows/ci.yml
+[npm-image]: https://img.shields.io/npm/v/router.svg
+[npm-url]: https://npmjs.org/package/router
+[node-version-image]: https://img.shields.io/node/v/router.svg
+[node-version-url]: http://nodejs.org/download/
+[coveralls-image]: https://img.shields.io/coveralls/pillarjs/router/master.svg
+[coveralls-url]: https://coveralls.io/r/pillarjs/router?branch=master
+[downloads-image]: https://img.shields.io/npm/dm/router.svg
+[downloads-url]: https://npmjs.org/package/router
