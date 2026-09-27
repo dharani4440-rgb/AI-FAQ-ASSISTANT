@@ -1,380 +1,396 @@
-# MongoDB Node.js Driver
+# jsonwebtoken
 
-The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
+| **Build**                                                                                                                               | **Dependency**                                                                                                         |
+|-----------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|
+| [![Build Status](https://secure.travis-ci.org/auth0/node-jsonwebtoken.svg?branch=master)](http://travis-ci.org/auth0/node-jsonwebtoken) | [![Dependency Status](https://david-dm.org/auth0/node-jsonwebtoken.svg)](https://david-dm.org/auth0/node-jsonwebtoken) |
 
-**Upgrading to version 7? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_7.0.0.md)!**
 
-## Quick Links
+An implementation of [JSON Web Tokens](https://tools.ietf.org/html/rfc7519).
 
-| Site                     | Link                                                                                                                                  |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Documentation            | [www.mongodb.com/docs/drivers/node](https://www.mongodb.com/docs/drivers/node)                                                        |
-| API Docs                 | [mongodb.github.io/node-mongodb-native](https://mongodb.github.io/node-mongodb-native)                                                |
-| `npm` package            | [www.npmjs.com/package/mongodb](https://www.npmjs.com/package/mongodb)                                                                |
-| MongoDB                  | [www.mongodb.com](https://www.mongodb.com)                                                                                            |
-| MongoDB University       | [learn.mongodb.com](https://learn.mongodb.com/catalog?labels=%5B%22Language%22%5D&values=%5B%22Node.js%22%5D)                         |
-| MongoDB Developer Center | [www.mongodb.com/developer](https://www.mongodb.com/developer/languages/javascript/)                                                  |
-| Stack Overflow           | [stackoverflow.com](https://stackoverflow.com/search?q=%28%5Btypescript%5D+or+%5Bjavascript%5D+or+%5Bnode.js%5D%29+and+%5Bmongodb%5D) |
-| Source Code              | [github.com/mongodb/node-mongodb-native](https://github.com/mongodb/node-mongodb-native)                                              |
-| Upgrade to v7            | [etc/notes/CHANGES_7.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_7.0.0.md)                     |
-| Contributing             | [CONTRIBUTING.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md)                                           |
-| Changelog                | [HISTORY.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md)                                                     |
+This was developed against `draft-ietf-oauth-json-web-token-08`. It makes use of [node-jws](https://github.com/brianloveswords/node-jws)
 
-### Release Integrity
-
-Releases are created automatically and signed using the [Node team's GPG key](https://pgp.mongodb.com/node-driver.asc). All release packages provided as part of a GitHub release are signed. To verify the provided packages, download the key and import it using gpg:
-
-```shell
-gpg --import node-driver.asc
-```
-
-The GitHub release contains a detached signature file for the NPM package (named
-`mongodb-X.Y.Z.tgz.sig`).
-
-The following command returns the link npm package.
-
-```shell
-npm view mongodb@vX.Y.Z dist.tarball
-```
-
-Using the result of the above command, a `curl` command can return the official npm package for the release.
-
-To verify the integrity of the downloaded package, run the following command:
-
-```shell
-gpg --verify mongodb-X.Y.Z.tgz.sig mongodb-X.Y.Z.tgz
-```
-
-> [!Note]
-> No GPG verification is done when using npm to install the package. The contents of the GitHub tarball and npm's tarball are identical.
-
-Releases published to the npm registry also include a [provenance attestation](https://docs.npmjs.com/generating-provenance-statements), which cryptographically links the package to its source repository and build workflow. To verify provenance:
-
-```shell
-npm audit signatures
-```
-
-The MongoDB Node.js driver follows [semantic versioning](https://semver.org/) for its releases.
-
-### Bugs / Feature Requests
-
-Think you’ve found a bug? Want to see a new feature in `node-mongodb-native`? Please open a
-case in our issue management tool, JIRA:
-
-- Create an account and login [jira.mongodb.org](https://jira.mongodb.org).
-- Navigate to the NODE project [jira.mongodb.org/browse/NODE](https://jira.mongodb.org/browse/NODE).
-- Click **Create Issue** - Please provide as much information as possible about the issue type and how to reproduce it.
-
-Bug reports in JIRA for all driver projects (i.e. NODE, PYTHON, CSHARP, JAVA) and the
-Core Server (i.e. SERVER) project are **public**.
-
-### Support / Feedback
-
-For issues with, questions about, or feedback for the Node.js driver, please look into our [support channels](https://www.mongodb.com/docs/manual/support). Please do not email any of the driver developers directly with issues or questions - you're more likely to get an answer on the [MongoDB Community Forums](https://community.mongodb.com/tags/c/drivers-odms-connectors/7/node-js-driver).
-
-### Change Log
-
-Change history can be found in [`HISTORY.md`](https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md).
-
-### Compatibility
-
-The driver currently supports 4.4+ servers.
-
-For exhaustive server and runtime version compatibility matrices, please refer to the following links:
-
-- [MongoDB](https://www.mongodb.com/docs/drivers/node/current/compatibility/#mongodb-compatibility)
-- [NodeJS](https://www.mongodb.com/docs/drivers/node/current/compatibility/#language-compatibility)
-
-#### Component Support Matrix
-
-The following table describes add-on component version compatibility for the Node.js driver. Only packages with versions in these supported ranges are stable when used in combination.
-
-| Component                                                                            | `mongodb@3.x`      | `mongodb@4.x`      | `mongodb@5.x`      | `mongodb@<6.12` | `mongodb@>=6.12`   | `mongodb@7.x` |
-| ------------------------------------------------------------------------------------ | ------------------ | ------------------ | ------------------ | --------------- | ------------------ | ------------- |
-| [bson](https://www.npmjs.com/package/bson)                                           | ^1.0.0             | ^4.0.0             | ^5.0.0             | ^6.0.0          | ^6.0.0             | ^7.0.0        |
-| [bson-ext](https://www.npmjs.com/package/bson-ext)                                   | ^1.0.0 \|\| ^2.0.0 | ^4.0.0             | N/A                | N/A             | N/A                | N/A           |
-| [kerberos](https://www.npmjs.com/package/kerberos)                                   | ^1.0.0             | ^1.0.0 \|\| ^2.0.0 | ^1.0.0 \|\| ^2.0.0 | ^2.0.1          | ^2.0.1             | ^7.0.0        |
-| [mongodb-client-encryption](https://www.npmjs.com/package/mongodb-client-encryption) | ^1.0.0             | ^1.0.0 \|\| ^2.0.0 | ^2.3.0             | ^6.0.0          | ^6.0.0             | ^7.0.0        |
-| [mongodb-legacy](https://www.npmjs.com/package/mongodb-legacy)                       | N/A                | ^4.0.0             | ^5.0.0             | ^6.0.0          | ^6.0.0             | N/A           |
-| [@mongodb-js/zstd](https://www.npmjs.com/package/@mongodb-js/zstd)                   | N/A                | ^1.0.0             | ^1.0.0             | ^1.1.0          | ^1.1.0 \|\| ^2.0.0 | ^7.0.0        |
-
-#### Typescript Version
-
-We recommend using the latest version of typescript, however we currently ensure the driver's public types compile against `typescript@5.6.0`.
-This is the lowest typescript version guaranteed to work with our driver: older versions may or may not work - use at your own risk.
-Since typescript [does not restrict breaking changes to major versions](https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes), we consider this support best effort.
-If you run into any unexpected compiler failures against our supported TypeScript versions, please let us know by filing an issue on our [JIRA](https://jira.mongodb.org/browse/NODE).
-
-Additionally, our Typescript types are compatible with the ECMAScript standard for our minimum supported Node version. Currently, our Typescript targets es2023.
-
-#### Running in Custom Runtimes
-
-We are working on removing Node.js as a dependency of the driver, so that in the future it will be possible to use the driver in non-Node environments.
-This work is currently in progress, and if you're curious, this is [our first runtime adapter commit](https://github.com/mongodb/node-mongodb-native/commit/d2ad07f20903d86334da81222a6df9717f76faaa).
-
-Some things to keep in mind if you are using a non-Node runtime:
-
-1. Users of Webpack/Vite may need to prevent `crypto` polyfill injection.
-2. Auth mechanism `SCRAM-SHA-1` has a hard dependency on Node.js.
-3. Auth mechanism `SCRAM-SHA-1` is not supported in FIPS mode.
-
-## Installation
-
-The recommended way to get started using the Node.js driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
-
-After you've created your own project using `npm init`, you can run:
+# Install
 
 ```bash
-npm install mongodb
+$ npm install jsonwebtoken
 ```
 
-This will download the MongoDB driver and add a dependency entry in your `package.json` file.
+# Migration notes
 
-If you are a Typescript user, you will need the Node.js type definitions to use the driver's definitions:
+* [From v8 to v9](https://github.com/auth0/node-jsonwebtoken/wiki/Migration-Notes:-v8-to-v9)
+* [From v7 to v8](https://github.com/auth0/node-jsonwebtoken/wiki/Migration-Notes:-v7-to-v8)
 
-```sh
-npm install -D @types/node
-```
+# Usage
 
-## Driver Extensions
+### jwt.sign(payload, secretOrPrivateKey, [options, callback])
 
-The MongoDB driver can optionally be enhanced by the following feature packages:
+(Asynchronous) If a callback is supplied, the callback is called with the `err` or the JWT.
 
-Maintained by MongoDB:
+(Synchronous) Returns the JsonWebToken as string
 
-- Zstd network compression - [@mongodb-js/zstd](https://github.com/mongodb-js/zstd)
-- MongoDB field level and queryable encryption - [mongodb-client-encryption](https://github.com/mongodb/libmongocrypt#readme)
-- GSSAPI / SSPI / Kerberos authentication - [kerberos](https://github.com/mongodb-js/kerberos)
+`payload` could be an object literal, buffer or string representing valid JSON. 
+> **Please _note_ that** `exp` or any other claim is only set if the payload is an object literal. Buffer or string payloads are not checked for JSON validity.
 
-Some of these packages include native C++ extensions.
-Consult the [trouble shooting guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/native-extensions.md) if you run into compilation issues.
+> If `payload` is not a buffer or a string, it will be coerced into a string using `JSON.stringify`.
 
-Third party:
+`secretOrPrivateKey` is a string (utf-8 encoded), buffer, object, or KeyObject containing either the secret for HMAC algorithms or the PEM
+encoded private key for RSA and ECDSA. In case of a private key with passphrase an object `{ key, passphrase }` can be used (based on [crypto documentation](https://nodejs.org/api/crypto.html#crypto_sign_sign_private_key_output_format)), in this case be sure you pass the `algorithm` option.
+When signing with RSA algorithms the minimum modulus length is 2048 except when the allowInsecureKeySizes option is set to true. Private keys below this size will be rejected with an error.
 
-- Snappy network compression - [snappy](https://github.com/Brooooooklyn/snappy)
-- AWS authentication - [@aws-sdk/credential-providers](https://github.com/aws/aws-sdk-js-v3/tree/main/packages/credential-providers)
+`options`:
 
-## Quick Start
+* `algorithm` (default: `HS256`)
+* `expiresIn`: expressed in seconds or a string describing a time span [vercel/ms](https://github.com/vercel/ms). 
+  > Eg: `60`, `"2 days"`, `"10h"`, `"7d"`. A numeric value is interpreted as a seconds count. If you use a string be sure you provide the time units (days, hours, etc), otherwise milliseconds unit is used by default (`"120"` is equal to `"120ms"`).
+* `notBefore`: expressed in seconds or a string describing a time span [vercel/ms](https://github.com/vercel/ms). 
+  > Eg: `60`, `"2 days"`, `"10h"`, `"7d"`. A numeric value is interpreted as a seconds count. If you use a string be sure you provide the time units (days, hours, etc), otherwise milliseconds unit is used by default (`"120"` is equal to `"120ms"`).
+* `audience`
+* `issuer`
+* `jwtid`
+* `subject`
+* `noTimestamp`
+* `header`
+* `keyid`
+* `mutatePayload`: if true, the sign function will modify the payload object directly. This is useful if you need a raw reference to the payload after claims have been applied to it but before it has been encoded into a token.
+* `allowInsecureKeySizes`: if true allows private keys with a modulus below 2048 to be used for RSA
+* `allowInvalidAsymmetricKeyTypes`: if true, allows asymmetric keys which do not match the specified algorithm. This option is intended only for backwards compatability and should be avoided.
 
-This guide will show you how to set up a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD operations. For more in-depth coverage, see the [official documentation](https://www.mongodb.com/docs/drivers/node/).
 
-### Create the `package.json` file
 
-First, create a directory where your application will live.
+> There are no default values for `expiresIn`, `notBefore`, `audience`, `subject`, `issuer`.  These claims can also be provided in the payload directly with `exp`, `nbf`, `aud`, `sub` and `iss` respectively, but you **_can't_** include in both places.
 
-```bash
-mkdir myProject
-cd myProject
-```
+Remember that `exp`, `nbf` and `iat` are **NumericDate**, see related [Token Expiration (exp claim)](#token-expiration-exp-claim)
 
-Enter the following command and answer the questions to create the initial structure for your new project:
 
-```bash
-npm init -y
-```
+The header can be customized via the `options.header` object.
 
-Next, install the driver as a dependency.
+Generated jwts will include an `iat` (issued at) claim by default unless `noTimestamp` is specified. If `iat` is inserted in the payload, it will be used instead of the real timestamp for calculating other things like `exp` given a timespan in `options.expiresIn`.
 
-```bash
-npm install mongodb
-```
-
-### Start a MongoDB Server
-
-For complete MongoDB installation instructions, see [the manual](https://www.mongodb.com/docs/manual/installation/).
-
-1. Download the right MongoDB version from [MongoDB](https://www.mongodb.org/downloads)
-2. Create a database directory (in this case under **/data**).
-3. Install and start a `mongod` process.
-
-```bash
-mongod --dbpath=/data
-```
-
-You should see the **mongod** process start up and print some status information.
-
-### Connect to MongoDB
-
-Create a new **app.js** file and add the following code to try out some basic CRUD
-operations using the MongoDB driver.
-
-Add code to connect to the server and the database **myProject**:
-
-> **NOTE:** Resolving DNS Connection issues
->
-> Node.js 18 changed the default DNS resolution ordering from always prioritizing IPv4 to the ordering
-> returned by the DNS provider. In some environments, this can result in `localhost` resolving to
-> an IPv6 address instead of IPv4 and a consequent failure to connect to the server.
->
-> This can be resolved by:
->
-> - specifying the IP address family using the MongoClient `family` option (`MongoClient(<uri>, { family: 4 } )`)
-> - launching mongod or mongos with the ipv6 flag enabled ([--ipv6 mongod option documentation](https://www.mongodb.com/docs/manual/reference/program/mongod/#std-option-mongod.--ipv6))
-> - using a host of `127.0.0.1` in place of localhost
-> - specifying the DNS resolution ordering with the `--dns-resolution-order` Node.js command line argument (e.g. `node --dns-resolution-order=ipv4first`)
+Synchronous Sign with default (HMAC SHA256)
 
 ```js
-const { MongoClient } = require('mongodb');
-// or as an es module:
-// import { MongoClient } from 'mongodb'
-
-// Connection URL
-const url = 'mongodb://localhost:27017';
-const client = new MongoClient(url);
-
-// Database Name
-const dbName = 'myProject';
-
-async function main() {
-  // Use connect method to connect to the server
-  await client.connect();
-  console.log('Connected successfully to server');
-  const db = client.db(dbName);
-  const collection = db.collection('documents');
-
-  // the following code examples can be pasted here...
-
-  return 'done.';
-}
-
-main()
-  .then(console.log)
-  .catch(console.error)
-  .finally(() => client.close());
+var jwt = require('jsonwebtoken');
+var token = jwt.sign({ foo: 'bar' }, 'shhhhh');
 ```
 
-Run your app from the command line with:
-
-```bash
-node app.js
+Synchronous Sign with RSA SHA256
+```js
+// sign with RSA SHA256
+var privateKey = fs.readFileSync('private.key');
+var token = jwt.sign({ foo: 'bar' }, privateKey, { algorithm: 'RS256' });
 ```
 
-The application should print **Connected successfully to server** to the console.
+Sign asynchronously
+```js
+jwt.sign({ foo: 'bar' }, privateKey, { algorithm: 'RS256' }, function(err, token) {
+  console.log(token);
+});
+```
 
-### Insert a Document
+Backdate a jwt 30 seconds
+```js
+var older_token = jwt.sign({ foo: 'bar', iat: Math.floor(Date.now() / 1000) - 30 }, 'shhhhh');
+```
 
-Add to **app.js** the following function which uses the **insertMany**
-method to add three documents to the **documents** collection.
+#### Token Expiration (exp claim)
+
+The standard for JWT defines an `exp` claim for expiration. The expiration is represented as a **NumericDate**:
+
+> A JSON numeric value representing the number of seconds from 1970-01-01T00:00:00Z UTC until the specified UTC date/time, ignoring leap seconds.  This is equivalent to the IEEE Std 1003.1, 2013 Edition [POSIX.1] definition "Seconds Since the Epoch", in which each day is accounted for by exactly 86400 seconds, other than that non-integer values can be represented.  See RFC 3339 [RFC3339] for details regarding date/times in general and UTC in particular.
+
+This means that the `exp` field should contain the number of seconds since the epoch.
+
+Signing a token with 1 hour of expiration:
+
+```javascript
+jwt.sign({
+  exp: Math.floor(Date.now() / 1000) + (60 * 60),
+  data: 'foobar'
+}, 'secret');
+```
+
+Another way to generate a token like this with this library is:
+
+```javascript
+jwt.sign({
+  data: 'foobar'
+}, 'secret', { expiresIn: 60 * 60 });
+
+//or even better:
+
+jwt.sign({
+  data: 'foobar'
+}, 'secret', { expiresIn: '1h' });
+```
+
+### jwt.verify(token, secretOrPublicKey, [options, callback])
+
+(Asynchronous) If a callback is supplied, function acts asynchronously. The callback is called with the decoded payload if the signature is valid and optional expiration, audience, or issuer are valid. If not, it will be called with the error.
+
+(Synchronous) If a callback is not supplied, function acts synchronously. Returns the payload decoded if the signature is valid and optional expiration, audience, or issuer are valid. If not, it will throw the error.
+
+> __Warning:__ When the token comes from an untrusted source (e.g. user input or external requests), the returned decoded payload should be treated like any other user input; please make sure to sanitize and only work with properties that are expected
+
+`token` is the JsonWebToken string
+
+`secretOrPublicKey` is a string (utf-8 encoded), buffer, or KeyObject containing either the secret for HMAC algorithms, or the PEM
+encoded public key for RSA and ECDSA.
+If `jwt.verify` is called asynchronous, `secretOrPublicKey` can be a function that should fetch the secret or public key. See below for a detailed example
+
+As mentioned in [this comment](https://github.com/auth0/node-jsonwebtoken/issues/208#issuecomment-231861138), there are other libraries that expect base64 encoded secrets (random bytes encoded using base64), if that is your case you can pass `Buffer.from(secret, 'base64')`, by doing this the secret will be decoded using base64 and the token verification will use the original random bytes.
+
+`options`
+
+* `algorithms`: List of strings with the names of the allowed algorithms. For instance, `["HS256", "HS384"]`. 
+  > If not specified a defaults will be used based on the type of key provided
+  > * secret - ['HS256', 'HS384', 'HS512']
+  > * rsa - ['RS256', 'RS384', 'RS512']
+  > * ec - ['ES256', 'ES384', 'ES512']
+  > * default - ['RS256', 'RS384', 'RS512']
+* `audience`: if you want to check audience (`aud`), provide a value here. The audience can be checked against a string, a regular expression or a list of strings and/or regular expressions. 
+  > Eg: `"urn:foo"`, `/urn:f[o]{2}/`, `[/urn:f[o]{2}/, "urn:bar"]`
+* `complete`: return an object with the decoded `{ payload, header, signature }` instead of only the usual content of the payload.
+* `issuer` (optional): string or array of strings of valid values for the `iss` field.
+* `jwtid` (optional): if you want to check JWT ID (`jti`), provide a string value here.
+* `ignoreExpiration`: if `true` do not validate the expiration of the token.
+* `ignoreNotBefore`...
+* `subject`: if you want to check subject (`sub`), provide a value here
+* `clockTolerance`: number of seconds to tolerate when checking the `nbf` and `exp` claims, to deal with small clock differences among different servers
+* `maxAge`: the maximum allowed age for tokens to still be valid. It is expressed in seconds or a string describing a time span [vercel/ms](https://github.com/vercel/ms). 
+  > Eg: `1000`, `"2 days"`, `"10h"`, `"7d"`. A numeric value is interpreted as a seconds count. If you use a string be sure you provide the time units (days, hours, etc), otherwise milliseconds unit is used by default (`"120"` is equal to `"120ms"`).
+* `clockTimestamp`: the time in seconds that should be used as the current time for all necessary comparisons.
+* `nonce`: if you want to check `nonce` claim, provide a string value here. It is used on Open ID for the ID Tokens. ([Open ID implementation notes](https://openid.net/specs/openid-connect-core-1_0.html#NonceNotes))
+* `allowInvalidAsymmetricKeyTypes`: if true, allows asymmetric keys which do not match the specified algorithm. This option is intended only for backwards compatability and should be avoided.
 
 ```js
-const insertResult = await collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }]);
-console.log('Inserted documents =>', insertResult);
-```
+// verify a token symmetric - synchronous
+var decoded = jwt.verify(token, 'shhhhh');
+console.log(decoded.foo) // bar
 
-The **insertMany** command returns an object with information about the insert operations.
+// verify a token symmetric
+jwt.verify(token, 'shhhhh', function(err, decoded) {
+  console.log(decoded.foo) // bar
+});
 
-### Find All Documents
-
-Add a query that returns all the documents.
-
-```js
-const findResult = await collection.find({}).toArray();
-console.log('Found documents =>', findResult);
-```
-
-This query returns all the documents in the **documents** collection.
-If you add this below the insertMany example, you'll see the documents you've inserted.
-
-### Find Documents with a Query Filter
-
-Add a query filter to find only documents which meet the query criteria.
-
-```js
-const filteredDocs = await collection.find({ a: 3 }).toArray();
-console.log('Found documents filtered by { a: 3 } =>', filteredDocs);
-```
-
-Only the documents which match `'a' : 3` should be returned.
-
-### Update a document
-
-The following operation updates a document in the **documents** collection.
-
-```js
-const updateResult = await collection.updateOne({ a: 3 }, { $set: { b: 1 } });
-console.log('Updated documents =>', updateResult);
-```
-
-The method updates the first document where the field **a** is equal to **3** by adding a new field **b** to the document set to **1**. `updateResult` contains information about whether there was a matching document to update or not.
-
-### Remove a document
-
-Remove the document where the field **a** is equal to **3**.
-
-```js
-const deleteResult = await collection.deleteMany({ a: 3 });
-console.log('Deleted documents =>', deleteResult);
-```
-
-### Index a Collection
-
-[Indexes](https://www.mongodb.com/docs/manual/indexes/) can improve your application's
-performance. The following function creates an index on the **a** field in the
-**documents** collection.
-
-```js
-const indexName = await collection.createIndex({ a: 1 });
-console.log('index name =', indexName);
-```
-
-For more detailed information, see the [indexing strategies page](https://www.mongodb.com/docs/manual/applications/indexes/).
-
-## Error Handling
-
-If you need to filter certain errors from our driver, we have a helpful tree of errors described in [etc/notes/errors.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/errors.md).
-
-It is our recommendation to use `instanceof` checks on errors and to avoid relying on parsing `error.message` and `error.name` strings in your code.
-We guarantee `instanceof` checks will pass according to semver guidelines, but errors may be sub-classed or their messages may change at any time, even patch releases, as we see fit to increase the helpfulness of the errors.
-
-Any new errors we add to the driver will directly extend an existing error class and no existing error will be moved to a different parent class outside of a major release.
-This means `instanceof` will always be able to accurately capture the errors that our driver throws.
-
-```typescript
-const client = new MongoClient(url);
-await client.connect();
-const collection = client.db().collection('collection');
-
+// invalid token - synchronous
 try {
-  await collection.insertOne({ _id: 1 });
-  await collection.insertOne({ _id: 1 }); // duplicate key error
-} catch (error) {
-  if (error instanceof MongoServerError) {
-    console.log(`Error worth logging: ${error}`); // special case for some reason
-  }
-  throw error; // still want to crash
+  var decoded = jwt.verify(token, 'wrong-secret');
+} catch(err) {
+  // err
 }
+
+// invalid token
+jwt.verify(token, 'wrong-secret', function(err, decoded) {
+  // err
+  // decoded undefined
+});
+
+// verify a token asymmetric
+var cert = fs.readFileSync('public.pem');  // get public key
+jwt.verify(token, cert, function(err, decoded) {
+  console.log(decoded.foo) // bar
+});
+
+// verify audience
+var cert = fs.readFileSync('public.pem');  // get public key
+jwt.verify(token, cert, { audience: 'urn:foo' }, function(err, decoded) {
+  // if audience mismatch, err == invalid audience
+});
+
+// verify issuer
+var cert = fs.readFileSync('public.pem');  // get public key
+jwt.verify(token, cert, { audience: 'urn:foo', issuer: 'urn:issuer' }, function(err, decoded) {
+  // if issuer mismatch, err == invalid issuer
+});
+
+// verify jwt id
+var cert = fs.readFileSync('public.pem');  // get public key
+jwt.verify(token, cert, { audience: 'urn:foo', issuer: 'urn:issuer', jwtid: 'jwtid' }, function(err, decoded) {
+  // if jwt id mismatch, err == invalid jwt id
+});
+
+// verify subject
+var cert = fs.readFileSync('public.pem');  // get public key
+jwt.verify(token, cert, { audience: 'urn:foo', issuer: 'urn:issuer', jwtid: 'jwtid', subject: 'subject' }, function(err, decoded) {
+  // if subject mismatch, err == invalid subject
+});
+
+// alg mismatch
+var cert = fs.readFileSync('public.pem'); // get public key
+jwt.verify(token, cert, { algorithms: ['RS256'] }, function (err, payload) {
+  // if token alg != RS256,  err == invalid signature
+});
+
+// Verify using getKey callback
+// Example uses https://github.com/auth0/node-jwks-rsa as a way to fetch the keys.
+var jwksClient = require('jwks-rsa');
+var client = jwksClient({
+  jwksUri: 'https://sandrino.auth0.com/.well-known/jwks.json'
+});
+function getKey(header, callback){
+  client.getSigningKey(header.kid, function(err, key) {
+    var signingKey = key.publicKey || key.rsaPublicKey;
+    callback(null, signingKey);
+  });
+}
+
+jwt.verify(token, getKey, options, function(err, decoded) {
+  console.log(decoded.foo) // bar
+});
+
 ```
 
-## Nightly releases
+<details>
+<summary><em></em>Need to peek into a JWT without verifying it? (Click to expand)</summary>
 
-If you need to test with a change from the latest `main` branch, our `mongodb` npm package has nightly versions released under the `nightly` tag.
+### jwt.decode(token [, options])
 
-```sh
-npm install mongodb@nightly
+(Synchronous) Returns the decoded payload without verifying if the signature is valid.
+
+> __Warning:__ This will __not__ verify whether the signature is valid. You should __not__ use this for untrusted messages. You most likely want to use `jwt.verify` instead.
+
+> __Warning:__ When the token comes from an untrusted source (e.g. user input or external request), the returned decoded payload should be treated like any other user input; please make sure to sanitize and only work with properties that are expected
+
+
+`token` is the JsonWebToken string
+
+`options`:
+
+* `json`: force JSON.parse on the payload even if the header doesn't contain `"typ":"JWT"`.
+* `complete`: return an object with the decoded payload and header.
+
+Example
+
+```js
+// get the decoded payload ignoring signature, no secretOrPrivateKey needed
+var decoded = jwt.decode(token);
+
+// get the decoded payload and header
+var decoded = jwt.decode(token, {complete: true});
+console.log(decoded.header);
+console.log(decoded.payload)
 ```
 
-Nightly versions are published regardless of testing outcome.
-This means there could be semantic breakages or partially implemented features.
-The nightly build is not suitable for production use.
+</details>
 
-## Experimental Features
+## Errors & Codes
+Possible thrown errors during verification.
+Error is the first argument of the verification callback.
 
-The MongoDB Node.js driver offers cutting-edge experimental features that give you early access to new capabilities and APIs. These features are marked with `@experimental` tags and are great for exploring new functionality and providing [feedback](#support--feedback).
+### TokenExpiredError
 
-Experimental features are not subject to [semantic versioning](https://semver.org/) rules, so breaking changes or removal may occur in any future release. The use of these features is not recommended for production environments.
+Thrown error if the token is expired.
 
-Explore the full list of experimental features, complete with descriptions and usage examples, in [EXPERIMENTAL_FEATURES.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/EXPERIMENTAL_FEATURES.md).
+Error object:
 
-## Next Steps
+* name: 'TokenExpiredError'
+* message: 'jwt expired'
+* expiredAt: [ExpDate]
 
-- [MongoDB Documentation](https://www.mongodb.com/docs/manual/)
-- [MongoDB Node Driver Documentation](https://www.mongodb.com/docs/drivers/node/)
-- [Read about Schemas](https://www.mongodb.com/docs/manual/core/data-modeling-introduction/)
-- [Star us on GitHub](https://github.com/mongodb/node-mongodb-native)
+```js
+jwt.verify(token, 'shhhhh', function(err, decoded) {
+  if (err) {
+    /*
+      err = {
+        name: 'TokenExpiredError',
+        message: 'jwt expired',
+        expiredAt: 1408621000
+      }
+    */
+  }
+});
+```
+
+### JsonWebTokenError
+Error object:
+
+* name: 'JsonWebTokenError'
+* message:
+  * 'invalid token' - the header or payload could not be parsed
+  * 'jwt malformed' - the token does not have three components (delimited by a `.`)
+  * 'jwt signature is required'
+  * 'invalid signature'
+  * 'jwt audience invalid. expected: [OPTIONS AUDIENCE]'
+  * 'jwt issuer invalid. expected: [OPTIONS ISSUER]'
+  * 'jwt id invalid. expected: [OPTIONS JWT ID]'
+  * 'jwt subject invalid. expected: [OPTIONS SUBJECT]'
+
+```js
+jwt.verify(token, 'shhhhh', function(err, decoded) {
+  if (err) {
+    /*
+      err = {
+        name: 'JsonWebTokenError',
+        message: 'jwt malformed'
+      }
+    */
+  }
+});
+```
+
+### NotBeforeError
+Thrown if current time is before the nbf claim.
+
+Error object:
+
+* name: 'NotBeforeError'
+* message: 'jwt not active'
+* date: 2018-10-04T16:10:44.000Z
+
+```js
+jwt.verify(token, 'shhhhh', function(err, decoded) {
+  if (err) {
+    /*
+      err = {
+        name: 'NotBeforeError',
+        message: 'jwt not active',
+        date: 2018-10-04T16:10:44.000Z
+      }
+    */
+  }
+});
+```
+
+
+## Algorithms supported
+
+Array of supported algorithms. The following algorithms are currently supported.
+
+| alg Parameter Value | Digital Signature or MAC Algorithm                                     |
+|---------------------|------------------------------------------------------------------------|
+| HS256               | HMAC using SHA-256 hash algorithm                                      |
+| HS384               | HMAC using SHA-384 hash algorithm                                      |
+| HS512               | HMAC using SHA-512 hash algorithm                                      |
+| RS256               | RSASSA-PKCS1-v1_5 using SHA-256 hash algorithm                         |
+| RS384               | RSASSA-PKCS1-v1_5 using SHA-384 hash algorithm                         |
+| RS512               | RSASSA-PKCS1-v1_5 using SHA-512 hash algorithm                         |
+| PS256               | RSASSA-PSS using SHA-256 hash algorithm (only node ^6.12.0 OR >=8.0.0) |
+| PS384               | RSASSA-PSS using SHA-384 hash algorithm (only node ^6.12.0 OR >=8.0.0) |
+| PS512               | RSASSA-PSS using SHA-512 hash algorithm (only node ^6.12.0 OR >=8.0.0) |
+| ES256               | ECDSA using P-256 curve and SHA-256 hash algorithm                     |
+| ES384               | ECDSA using P-384 curve and SHA-384 hash algorithm                     |
+| ES512               | ECDSA using P-521 curve and SHA-512 hash algorithm                     |
+| none                | No digital signature or MAC value included                             |
+
+## Refreshing JWTs
+
+First of all, we recommend you to think carefully if auto-refreshing a JWT will not introduce any vulnerability in your system.
+
+We are not comfortable including this as part of the library, however, you can take a look at [this example](https://gist.github.com/ziluvatar/a3feb505c4c0ec37059054537b38fc48) to show how this could be accomplished.
+Apart from that example there are [an issue](https://github.com/auth0/node-jsonwebtoken/issues/122) and [a pull request](https://github.com/auth0/node-jsonwebtoken/pull/172) to get more knowledge about this topic.
+
+# TODO
+
+* X.509 certificate chain is not checked
+
+## Issue Reporting
+
+If you have found a bug or if you have a feature request, please report them at this repository issues section. Please do not report security vulnerabilities on the public GitHub issue tracker. The [Responsible Disclosure Program](https://auth0.com/whitehat) details the procedure for disclosing security issues.
+
+## Author
+
+[Auth0](https://auth0.com)
 
 ## License
 
-[Apache 2.0](LICENSE.md)
-
-© 2012-present MongoDB [Contributors](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTORS.md) \
-© 2009-2012 Christian Amor Kvalheim
+This project is licensed under the MIT license. See the [LICENSE](LICENSE) file for more info.
