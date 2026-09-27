@@ -1,416 +1,380 @@
-# router
+# MongoDB Node.js Driver
 
-[![NPM Version][npm-image]][npm-url]
-[![NPM Downloads][downloads-image]][downloads-url]
-[![Node.js Version][node-version-image]][node-version-url]
-[![Build Status][ci-image]][ci-url]
-[![Test Coverage][coveralls-image]][coveralls-url]
+The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
-Simple middleware-style router
+**Upgrading to version 7? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_7.0.0.md)!**
+
+## Quick Links
+
+| Site                     | Link                                                                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Documentation            | [www.mongodb.com/docs/drivers/node](https://www.mongodb.com/docs/drivers/node)                                                        |
+| API Docs                 | [mongodb.github.io/node-mongodb-native](https://mongodb.github.io/node-mongodb-native)                                                |
+| `npm` package            | [www.npmjs.com/package/mongodb](https://www.npmjs.com/package/mongodb)                                                                |
+| MongoDB                  | [www.mongodb.com](https://www.mongodb.com)                                                                                            |
+| MongoDB University       | [learn.mongodb.com](https://learn.mongodb.com/catalog?labels=%5B%22Language%22%5D&values=%5B%22Node.js%22%5D)                         |
+| MongoDB Developer Center | [www.mongodb.com/developer](https://www.mongodb.com/developer/languages/javascript/)                                                  |
+| Stack Overflow           | [stackoverflow.com](https://stackoverflow.com/search?q=%28%5Btypescript%5D+or+%5Bjavascript%5D+or+%5Bnode.js%5D%29+and+%5Bmongodb%5D) |
+| Source Code              | [github.com/mongodb/node-mongodb-native](https://github.com/mongodb/node-mongodb-native)                                              |
+| Upgrade to v7            | [etc/notes/CHANGES_7.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_7.0.0.md)                     |
+| Contributing             | [CONTRIBUTING.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md)                                           |
+| Changelog                | [HISTORY.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md)                                                     |
+
+### Release Integrity
+
+Releases are created automatically and signed using the [Node team's GPG key](https://pgp.mongodb.com/node-driver.asc). All release packages provided as part of a GitHub release are signed. To verify the provided packages, download the key and import it using gpg:
+
+```shell
+gpg --import node-driver.asc
+```
+
+The GitHub release contains a detached signature file for the NPM package (named
+`mongodb-X.Y.Z.tgz.sig`).
+
+The following command returns the link npm package.
+
+```shell
+npm view mongodb@vX.Y.Z dist.tarball
+```
+
+Using the result of the above command, a `curl` command can return the official npm package for the release.
+
+To verify the integrity of the downloaded package, run the following command:
+
+```shell
+gpg --verify mongodb-X.Y.Z.tgz.sig mongodb-X.Y.Z.tgz
+```
+
+> [!Note]
+> No GPG verification is done when using npm to install the package. The contents of the GitHub tarball and npm's tarball are identical.
+
+Releases published to the npm registry also include a [provenance attestation](https://docs.npmjs.com/generating-provenance-statements), which cryptographically links the package to its source repository and build workflow. To verify provenance:
+
+```shell
+npm audit signatures
+```
+
+The MongoDB Node.js driver follows [semantic versioning](https://semver.org/) for its releases.
+
+### Bugs / Feature Requests
+
+Think you’ve found a bug? Want to see a new feature in `node-mongodb-native`? Please open a
+case in our issue management tool, JIRA:
+
+- Create an account and login [jira.mongodb.org](https://jira.mongodb.org).
+- Navigate to the NODE project [jira.mongodb.org/browse/NODE](https://jira.mongodb.org/browse/NODE).
+- Click **Create Issue** - Please provide as much information as possible about the issue type and how to reproduce it.
+
+Bug reports in JIRA for all driver projects (i.e. NODE, PYTHON, CSHARP, JAVA) and the
+Core Server (i.e. SERVER) project are **public**.
+
+### Support / Feedback
+
+For issues with, questions about, or feedback for the Node.js driver, please look into our [support channels](https://www.mongodb.com/docs/manual/support). Please do not email any of the driver developers directly with issues or questions - you're more likely to get an answer on the [MongoDB Community Forums](https://community.mongodb.com/tags/c/drivers-odms-connectors/7/node-js-driver).
+
+### Change Log
+
+Change history can be found in [`HISTORY.md`](https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md).
+
+### Compatibility
+
+The driver currently supports 4.4+ servers.
+
+For exhaustive server and runtime version compatibility matrices, please refer to the following links:
+
+- [MongoDB](https://www.mongodb.com/docs/drivers/node/current/compatibility/#mongodb-compatibility)
+- [NodeJS](https://www.mongodb.com/docs/drivers/node/current/compatibility/#language-compatibility)
+
+#### Component Support Matrix
+
+The following table describes add-on component version compatibility for the Node.js driver. Only packages with versions in these supported ranges are stable when used in combination.
+
+| Component                                                                            | `mongodb@3.x`      | `mongodb@4.x`      | `mongodb@5.x`      | `mongodb@<6.12` | `mongodb@>=6.12`   | `mongodb@7.x` |
+| ------------------------------------------------------------------------------------ | ------------------ | ------------------ | ------------------ | --------------- | ------------------ | ------------- |
+| [bson](https://www.npmjs.com/package/bson)                                           | ^1.0.0             | ^4.0.0             | ^5.0.0             | ^6.0.0          | ^6.0.0             | ^7.0.0        |
+| [bson-ext](https://www.npmjs.com/package/bson-ext)                                   | ^1.0.0 \|\| ^2.0.0 | ^4.0.0             | N/A                | N/A             | N/A                | N/A           |
+| [kerberos](https://www.npmjs.com/package/kerberos)                                   | ^1.0.0             | ^1.0.0 \|\| ^2.0.0 | ^1.0.0 \|\| ^2.0.0 | ^2.0.1          | ^2.0.1             | ^7.0.0        |
+| [mongodb-client-encryption](https://www.npmjs.com/package/mongodb-client-encryption) | ^1.0.0             | ^1.0.0 \|\| ^2.0.0 | ^2.3.0             | ^6.0.0          | ^6.0.0             | ^7.0.0        |
+| [mongodb-legacy](https://www.npmjs.com/package/mongodb-legacy)                       | N/A                | ^4.0.0             | ^5.0.0             | ^6.0.0          | ^6.0.0             | N/A           |
+| [@mongodb-js/zstd](https://www.npmjs.com/package/@mongodb-js/zstd)                   | N/A                | ^1.0.0             | ^1.0.0             | ^1.1.0          | ^1.1.0 \|\| ^2.0.0 | ^7.0.0        |
+
+#### Typescript Version
+
+We recommend using the latest version of typescript, however we currently ensure the driver's public types compile against `typescript@5.6.0`.
+This is the lowest typescript version guaranteed to work with our driver: older versions may or may not work - use at your own risk.
+Since typescript [does not restrict breaking changes to major versions](https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes), we consider this support best effort.
+If you run into any unexpected compiler failures against our supported TypeScript versions, please let us know by filing an issue on our [JIRA](https://jira.mongodb.org/browse/NODE).
+
+Additionally, our Typescript types are compatible with the ECMAScript standard for our minimum supported Node version. Currently, our Typescript targets es2023.
+
+#### Running in Custom Runtimes
+
+We are working on removing Node.js as a dependency of the driver, so that in the future it will be possible to use the driver in non-Node environments.
+This work is currently in progress, and if you're curious, this is [our first runtime adapter commit](https://github.com/mongodb/node-mongodb-native/commit/d2ad07f20903d86334da81222a6df9717f76faaa).
+
+Some things to keep in mind if you are using a non-Node runtime:
+
+1. Users of Webpack/Vite may need to prevent `crypto` polyfill injection.
+2. Auth mechanism `SCRAM-SHA-1` has a hard dependency on Node.js.
+3. Auth mechanism `SCRAM-SHA-1` is not supported in FIPS mode.
 
 ## Installation
 
-This is a [Node.js](https://nodejs.org/en/) module available through the
-[npm registry](https://www.npmjs.com/). Installation is done using the
-[`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
+The recommended way to get started using the Node.js driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
+
+After you've created your own project using `npm init`, you can run:
 
 ```bash
-$ npm install router
+npm install mongodb
 ```
 
-## API
+This will download the MongoDB driver and add a dependency entry in your `package.json` file.
 
-```js
-var finalhandler = require('finalhandler')
-var http = require('http')
-var Router = require('router')
+If you are a Typescript user, you will need the Node.js type definitions to use the driver's definitions:
 
-var router = Router()
-router.get('/', function (req, res) {
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-  res.end('Hello World!')
-})
-
-var server = http.createServer(function (req, res) {
-  router(req, res, finalhandler(req, res))
-})
-
-server.listen(3000)
+```sh
+npm install -D @types/node
 ```
 
-This module is currently an extracted version from the Express project,
-but with the main change being it can be used with a plain `http.createServer`
-object or other web frameworks by removing Express-specific API calls.
+## Driver Extensions
 
-## Router(options)
+The MongoDB driver can optionally be enhanced by the following feature packages:
 
-Options
+Maintained by MongoDB:
 
-- `strict`        - When `false` trailing slashes are optional (default: `false`)
-- `caseSensitive` - When `true` the routing will be case sensitive. (default: `false`)
-- `mergeParams`   - When `true` any `req.params` passed to the router will be
-  merged into the router's `req.params`. (default: `false`) ([example](#example-using-mergeparams))
+- Zstd network compression - [@mongodb-js/zstd](https://github.com/mongodb-js/zstd)
+- MongoDB field level and queryable encryption - [mongodb-client-encryption](https://github.com/mongodb/libmongocrypt#readme)
+- GSSAPI / SSPI / Kerberos authentication - [kerberos](https://github.com/mongodb-js/kerberos)
 
-Returns a function with the signature `router(req, res, callback)` where
-`callback([err])` must be provided to handle errors and fall-through from
-not handling requests.
+Some of these packages include native C++ extensions.
+Consult the [trouble shooting guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/native-extensions.md) if you run into compilation issues.
 
-### router.use([path], ...middleware)
+Third party:
 
-Use the given [middleware function](#middleware) for all http methods on the
-given `path`, defaulting to the root path.
+- Snappy network compression - [snappy](https://github.com/Brooooooklyn/snappy)
+- AWS authentication - [@aws-sdk/credential-providers](https://github.com/aws/aws-sdk-js-v3/tree/main/packages/credential-providers)
 
-`router` does not automatically see `use` as a handler. As such, it will not
-consider it one for handling `OPTIONS` requests.
+## Quick Start
 
-* Note: If a `path` is specified, that `path` is stripped from the start of
-  `req.url`.
+This guide will show you how to set up a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD operations. For more in-depth coverage, see the [official documentation](https://www.mongodb.com/docs/drivers/node/).
 
-<!-- eslint-disable no-undef -->
+### Create the `package.json` file
 
-```js
-router.use(function (req, res, next) {
-  // do your things
+First, create a directory where your application will live.
 
-  // continue to the next middleware
-  // the request will stall if this is not called
-  next()
-
-  // note: you should NOT call `next` if you have begun writing to the response
-})
+```bash
+mkdir myProject
+cd myProject
 ```
 
-[Middleware](#middleware) can themselves use `next('router')` at any time to
-exit the current router instance completely, invoking the top-level callback.
+Enter the following command and answer the questions to create the initial structure for your new project:
 
-### router\[method](path, ...[middleware], handler)
-
-The [http methods](https://github.com/jshttp/methods/blob/master/index.js) provide
-the routing functionality in `router`.
-
-Method middleware and handlers follow usual [middleware](#middleware) behavior,
-except they will only be called when the method and path match the request.
-
-<!-- eslint-disable no-undef -->
-
-```js
-// handle a `GET` request
-router.get('/', function (req, res) {
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-  res.end('Hello World!')
-})
+```bash
+npm init -y
 ```
 
-[Middleware](#middleware) given before the handler have one additional trick,
-they may invoke `next('route')`. Calling `next('route')` bypasses the remaining
-middleware and the handler mounted for this route, passing the request to the
-next route suitable for handling this request.
+Next, install the driver as a dependency.
 
-Route handlers and middleware can themselves use `next('router')` at any time
-to exit the current router instance completely, invoking the top-level callback.
-
-### router.param(name, param_middleware)
-
-Maps the specified path parameter `name` to a specialized param-capturing middleware.
-
-This function positions the middleware in the same stack as `.use`.
-
-The function can optionally return a `Promise` object. If a `Promise` object
-is returned from the function, the router will attach an `onRejected` callback
-using `.then`. If the promise is rejected, `next` will be called with the
-rejected value, or an error if the value is falsy.
-
-Parameter mapping is used to provide pre-conditions to routes
-which use normalized placeholders. For example a _:user_id_ parameter
-could automatically load a user's information from the database without
-any additional code:
-
-<!-- eslint-disable no-undef -->
-
-```js
-router.param('user_id', function (req, res, next, id) {
-  User.find(id, function (err, user) {
-    if (err) {
-      return next(err)
-    } else if (!user) {
-      return next(new Error('failed to load user'))
-    }
-    req.user = user
-
-    // continue processing the request
-    next()
-  })
-})
+```bash
+npm install mongodb
 ```
 
-### router.route(path)
+### Start a MongoDB Server
 
-Creates an instance of a single `Route` for the given `path`.
-(See `Router.Route` below)
+For complete MongoDB installation instructions, see [the manual](https://www.mongodb.com/docs/manual/installation/).
 
-Routes can be used to handle http `methods` with their own, optional middleware.
+1. Download the right MongoDB version from [MongoDB](https://www.mongodb.org/downloads)
+2. Create a database directory (in this case under **/data**).
+3. Install and start a `mongod` process.
 
-Using `router.route(path)` is a recommended approach to avoiding duplicate
-route naming and thus typo errors.
-
-<!-- eslint-disable no-undef, no-unused-vars -->
-
-```js
-var api = router.route('/api/')
+```bash
+mongod --dbpath=/data
 ```
 
-## Router.Route(path)
+You should see the **mongod** process start up and print some status information.
 
-Represents a single route as an instance that can be used to handle http
-`methods` with it's own, optional middleware.
+### Connect to MongoDB
 
-### route\[method](handler)
+Create a new **app.js** file and add the following code to try out some basic CRUD
+operations using the MongoDB driver.
 
-These are functions which you can directly call on a route to register a new
-`handler` for the `method` on the route.
+Add code to connect to the server and the database **myProject**:
 
-<!-- eslint-disable no-undef -->
+> **NOTE:** Resolving DNS Connection issues
+>
+> Node.js 18 changed the default DNS resolution ordering from always prioritizing IPv4 to the ordering
+> returned by the DNS provider. In some environments, this can result in `localhost` resolving to
+> an IPv6 address instead of IPv4 and a consequent failure to connect to the server.
+>
+> This can be resolved by:
+>
+> - specifying the IP address family using the MongoClient `family` option (`MongoClient(<uri>, { family: 4 } )`)
+> - launching mongod or mongos with the ipv6 flag enabled ([--ipv6 mongod option documentation](https://www.mongodb.com/docs/manual/reference/program/mongod/#std-option-mongod.--ipv6))
+> - using a host of `127.0.0.1` in place of localhost
+> - specifying the DNS resolution ordering with the `--dns-resolution-order` Node.js command line argument (e.g. `node --dns-resolution-order=ipv4first`)
 
 ```js
-// handle a `GET` request
-var status = router.route('/status')
+const { MongoClient } = require('mongodb');
+// or as an es module:
+// import { MongoClient } from 'mongodb'
 
-status.get(function (req, res) {
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-  res.end('All Systems Green!')
-})
+// Connection URL
+const url = 'mongodb://localhost:27017';
+const client = new MongoClient(url);
+
+// Database Name
+const dbName = 'myProject';
+
+async function main() {
+  // Use connect method to connect to the server
+  await client.connect();
+  console.log('Connected successfully to server');
+  const db = client.db(dbName);
+  const collection = db.collection('documents');
+
+  // the following code examples can be pasted here...
+
+  return 'done.';
+}
+
+main()
+  .then(console.log)
+  .catch(console.error)
+  .finally(() => client.close());
 ```
 
-### route.all(handler)
+Run your app from the command line with:
 
-Adds a handler for all HTTP methods to this route.
-
-The handler can behave like middleware and call `next` to continue processing
-rather than responding.
-
-<!-- eslint-disable no-undef -->
-
-```js
-router.route('/')
-  .all(function (req, res, next) {
-    next()
-  })
-  .all(checkSomething)
-  .get(function (req, res) {
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-    res.end('Hello World!')
-  })
+```bash
+node app.js
 ```
 
-## Middleware
+The application should print **Connected successfully to server** to the console.
 
-Middleware (and method handlers) are functions that follow specific function
-parameters and have defined behavior when used with `router`. The most common
-format is with three parameters - "req", "res" and "next".
+### Insert a Document
 
-- `req`  - This is a [HTTP incoming message](https://nodejs.org/api/http.html#http_http_incomingmessage) instance.
-- `res`  - This is a [HTTP server response](https://nodejs.org/api/http.html#http_class_http_serverresponse) instance.
-- `next` - Calling this function that tells `router` to proceed to the next matching middleware or method handler. It accepts an error as the first argument.
-
-The function can optionally return a `Promise` object. If a `Promise` object
-is returned from the function, the router will attach an `onRejected` callback
-using `.then`. If the promise is rejected, `next` will be called with the
-rejected value, or an error if the value is falsy.
-
-Middleware and method handlers can also be defined with four arguments. When
-the function has four parameters defined, the first argument is an error and
-subsequent arguments remain, becoming - "err", "req", "res", "next". These
-functions are "error handling middleware", and can be used for handling
-errors that occurred in previous handlers (E.g. from calling `next(err)`).
-This is most used when you want to define arbitrary rendering of errors.
-
-<!-- eslint-disable no-undef -->
+Add to **app.js** the following function which uses the **insertMany**
+method to add three documents to the **documents** collection.
 
 ```js
-router.get('/error_route', function (req, res, next) {
-  return next(new Error('Bad Request'))
-})
-
-router.use(function (err, req, res, next) {
-  res.end(err.message) //= > "Bad Request"
-})
+const insertResult = await collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }]);
+console.log('Inserted documents =>', insertResult);
 ```
 
-Error handling middleware will **only** be invoked when an error was given. As
-long as the error is in the pipeline, normal middleware and handlers will be
-bypassed - only error handling middleware will be invoked with an error.
+The **insertMany** command returns an object with information about the insert operations.
 
-## Examples
+### Find All Documents
+
+Add a query that returns all the documents.
 
 ```js
-// import our modules
-var http = require('http')
-var Router = require('router')
-var finalhandler = require('finalhandler')
-var compression = require('compression')
-var bodyParser = require('body-parser')
+const findResult = await collection.find({}).toArray();
+console.log('Found documents =>', findResult);
+```
 
-// store our message to display
-var message = 'Hello World!'
+This query returns all the documents in the **documents** collection.
+If you add this below the insertMany example, you'll see the documents you've inserted.
 
-// initialize the router & server and add a final callback.
-var router = Router()
-var server = http.createServer(function onRequest (req, res) {
-  router(req, res, finalhandler(req, res))
-})
+### Find Documents with a Query Filter
 
-// use some middleware and compress all outgoing responses
-router.use(compression())
+Add a query filter to find only documents which meet the query criteria.
 
-// handle `GET` requests to `/message`
-router.get('/message', function (req, res) {
-  res.statusCode = 200
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-  res.end(message + '\n')
-})
+```js
+const filteredDocs = await collection.find({ a: 3 }).toArray();
+console.log('Found documents filtered by { a: 3 } =>', filteredDocs);
+```
 
-// create and mount a new router for our API
-var api = Router()
-router.use('/api/', api)
+Only the documents which match `'a' : 3` should be returned.
 
-// add a body parsing middleware to our API
-api.use(bodyParser.json())
+### Update a document
 
-// handle `PATCH` requests to `/api/set-message`
-api.patch('/set-message', function (req, res) {
-  if (req.body.value) {
-    message = req.body.value
+The following operation updates a document in the **documents** collection.
 
-    res.statusCode = 200
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-    res.end(message + '\n')
-  } else {
-    res.statusCode = 400
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-    res.end('Invalid API Syntax\n')
+```js
+const updateResult = await collection.updateOne({ a: 3 }, { $set: { b: 1 } });
+console.log('Updated documents =>', updateResult);
+```
+
+The method updates the first document where the field **a** is equal to **3** by adding a new field **b** to the document set to **1**. `updateResult` contains information about whether there was a matching document to update or not.
+
+### Remove a document
+
+Remove the document where the field **a** is equal to **3**.
+
+```js
+const deleteResult = await collection.deleteMany({ a: 3 });
+console.log('Deleted documents =>', deleteResult);
+```
+
+### Index a Collection
+
+[Indexes](https://www.mongodb.com/docs/manual/indexes/) can improve your application's
+performance. The following function creates an index on the **a** field in the
+**documents** collection.
+
+```js
+const indexName = await collection.createIndex({ a: 1 });
+console.log('index name =', indexName);
+```
+
+For more detailed information, see the [indexing strategies page](https://www.mongodb.com/docs/manual/applications/indexes/).
+
+## Error Handling
+
+If you need to filter certain errors from our driver, we have a helpful tree of errors described in [etc/notes/errors.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/errors.md).
+
+It is our recommendation to use `instanceof` checks on errors and to avoid relying on parsing `error.message` and `error.name` strings in your code.
+We guarantee `instanceof` checks will pass according to semver guidelines, but errors may be sub-classed or their messages may change at any time, even patch releases, as we see fit to increase the helpfulness of the errors.
+
+Any new errors we add to the driver will directly extend an existing error class and no existing error will be moved to a different parent class outside of a major release.
+This means `instanceof` will always be able to accurately capture the errors that our driver throws.
+
+```typescript
+const client = new MongoClient(url);
+await client.connect();
+const collection = client.db().collection('collection');
+
+try {
+  await collection.insertOne({ _id: 1 });
+  await collection.insertOne({ _id: 1 }); // duplicate key error
+} catch (error) {
+  if (error instanceof MongoServerError) {
+    console.log(`Error worth logging: ${error}`); // special case for some reason
   }
-})
-
-// make our http server listen to connections
-server.listen(8080)
+  throw error; // still want to crash
+}
 ```
 
-You can get the message by running this command in your terminal,
- or navigating to `127.0.0.1:8080` in a web browser.
-```bash
-curl http://127.0.0.1:8080
+## Nightly releases
+
+If you need to test with a change from the latest `main` branch, our `mongodb` npm package has nightly versions released under the `nightly` tag.
+
+```sh
+npm install mongodb@nightly
 ```
 
-You can set the message by sending it a `PATCH` request via this command:
-```bash
-curl http://127.0.0.1:8080/api/set-message -X PATCH -H "Content-Type: application/json" -d '{"value":"Cats!"}'
-```
+Nightly versions are published regardless of testing outcome.
+This means there could be semantic breakages or partially implemented features.
+The nightly build is not suitable for production use.
 
-### Example using mergeParams
+## Experimental Features
 
-```js
-var http = require('http')
-var Router = require('router')
-var finalhandler = require('finalhandler')
+The MongoDB Node.js driver offers cutting-edge experimental features that give you early access to new capabilities and APIs. These features are marked with `@experimental` tags and are great for exploring new functionality and providing [feedback](#support--feedback).
 
-// this example is about the mergeParams option
-var opts = { mergeParams: true }
+Experimental features are not subject to [semantic versioning](https://semver.org/) rules, so breaking changes or removal may occur in any future release. The use of these features is not recommended for production environments.
 
-// make a router with out special options
-var router = Router(opts)
-var server = http.createServer(function onRequest (req, res) {
-  // set something to be passed into the router
-  req.params = { type: 'kitten' }
+Explore the full list of experimental features, complete with descriptions and usage examples, in [EXPERIMENTAL_FEATURES.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/EXPERIMENTAL_FEATURES.md).
 
-  router(req, res, finalhandler(req, res))
-})
+## Next Steps
 
-router.get('/', function (req, res) {
-  res.statusCode = 200
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-
-  // with respond with the the params that were passed in
-  res.end(req.params.type + '\n')
-})
-
-// make another router with our options
-var handler = Router(opts)
-
-// mount our new router to a route that accepts a param
-router.use('/:path', handler)
-
-handler.get('/', function (req, res) {
-  res.statusCode = 200
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-
-  // will respond with the param of the router's parent route
-  res.end(req.params.path + '\n')
-})
-
-// make our http server listen to connections
-server.listen(8080)
-```
-
-Now you can get the type, or what path you are requesting:
-```bash
-curl http://127.0.0.1:8080
-> kitten
-curl http://127.0.0.1:8080/such_path
-> such_path
-```
-
-### Example of advanced `.route()` usage
-
-This example shows how to implement routes where there is a custom
-handler to execute when the path matched, but no methods matched.
-Without any special handling, this would be treated as just a
-generic non-match by `router` (which typically results in a 404),
-but with a custom handler, a `405 Method Not Allowed` can be sent.
-
-```js
-var http = require('http')
-var finalhandler = require('finalhandler')
-var Router = require('router')
-
-// create the router and server
-var router = new Router()
-var server = http.createServer(function onRequest (req, res) {
-  router(req, res, finalhandler(req, res))
-})
-
-// register a route and add all methods
-router.route('/pet/:id')
-  .get(function (req, res) {
-    // this is GET /pet/:id
-    res.setHeader('Content-Type', 'application/json')
-    res.end(JSON.stringify({ name: 'tobi' }))
-  })
-  .delete(function (req, res) {
-    // this is DELETE /pet/:id
-    res.end()
-  })
-  .all(function (req, res) {
-    // this is called for all other methods not
-    // defined above for /pet/:id
-    res.statusCode = 405
-    res.end()
-  })
-
-// make our http server listen to connections
-server.listen(8080)
-```
+- [MongoDB Documentation](https://www.mongodb.com/docs/manual/)
+- [MongoDB Node Driver Documentation](https://www.mongodb.com/docs/drivers/node/)
+- [Read about Schemas](https://www.mongodb.com/docs/manual/core/data-modeling-introduction/)
+- [Star us on GitHub](https://github.com/mongodb/node-mongodb-native)
 
 ## License
 
-[MIT](LICENSE)
+[Apache 2.0](LICENSE.md)
 
-[ci-image]: https://badgen.net/github/checks/pillarjs/router/master?label=ci
-[ci-url]: https://github.com/pillarjs/router/actions/workflows/ci.yml
-[npm-image]: https://img.shields.io/npm/v/router.svg
-[npm-url]: https://npmjs.org/package/router
-[node-version-image]: https://img.shields.io/node/v/router.svg
-[node-version-url]: http://nodejs.org/download/
-[coveralls-image]: https://img.shields.io/coveralls/pillarjs/router/master.svg
-[coveralls-url]: https://coveralls.io/r/pillarjs/router?branch=master
-[downloads-image]: https://img.shields.io/npm/dm/router.svg
-[downloads-url]: https://npmjs.org/package/router
+© 2012-present MongoDB [Contributors](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTORS.md) \
+© 2009-2012 Christian Amor Kvalheim
